@@ -30,26 +30,30 @@ Private Function GetHtml(url As String)
     GetHtml = Http.ResponseText
     Set Http = Nothing
 End Function
-Private Function СКЛОНЕНИЕ_ФРАЗ(ByVal ФРАЗА As String, Optional ByVal ПАДЕЖ As Integer = 1) As String
+Private Function СКЛОНЕНИЕ(ByVal ФРАЗА As String, Optional ByVal ПАДЕЖ As Integer = 1, Optional IsFIO = False) As String
     Dim sURL As String
     Dim HTMLText As String
     Dim StartText As Long, EndText As Long
     Dim TegStart As String, TegEnd As String
     Dim PAD As String
     If ПАДЕЖ < 1 Or ПАДЕЖ > 6 Then
-        СКЛОНЕНИЕ_ФРАЗ = "Падеж задан неверно"
+        СКЛОНЕНИЕ = "Падеж задан неверно"
         Exit Function
     End If
     Select Case ПАДЕЖ
         Case 1: 'именительный
-            СКЛОНЕНИЕ_ФРАЗ = ФРАЗА: Exit Function
+            СКЛОНЕНИЕ = ФРАЗА: Exit Function
         Case 2: PAD = "Р"    'родительный
         Case 3: PAD = "Д"    'дательный
         Case 4: PAD = "В"    'винительный
         Case 5: PAD = "Т"    'творительный
         Case 6: PAD = "П"    'предложный
     End Select
-    sURL = "https://micro-solution.ru/api/sklon_phrase.php?s=" & RussianStringToURLEncode(ФРАЗА)
+    If IsFIO Then
+        sURL = "https://micro-solution.ru/api/sklon.php?s=" & RussianStringToURLEncode(ФРАЗА)
+    Else
+        sURL = "https://micro-solution.ru/api/sklon_phrase.php?s=" & RussianStringToURLEncode(ФРАЗА)
+    End If
     HTMLText = GetHtml(sURL)
     TegStart = "<" & PAD & ">"
     TegEnd = "</" & PAD & ">"
@@ -59,5 +63,5 @@ Private Function СКЛОНЕНИЕ_ФРАЗ(ByVal ФРАЗА As String, Optiona
     End If
     StartText = InStr(1, HTMLText, TegStart)
     EndText = InStr(StartText, HTMLText, TegEnd)
-    СКЛОНЕНИЕ_ФРАЗ = Mid(HTMLText, StartText + Len(TegStart), EndText - StartText - Len(TegStart))
+    СКЛОНЕНИЕ = Mid(HTMLText, StartText + Len(TegStart), EndText - StartText - Len(TegStart))
 End Function
